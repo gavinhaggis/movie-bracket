@@ -20,6 +20,21 @@ export interface Match {
 
 export type Phase = 'setup' | 'entry' | 'bracket' | 'elimination3' | 'final2' | 'winner';
 
+export interface EliminationRecord {
+  filmTitle: string;
+  posterPath: string | null;
+  round: string;
+  eliminatedBy?: string;
+}
+
+export interface TournamentHistoryEntry {
+  id: string;
+  date: string;
+  winner: { title: string; posterPath: string | null; year: string };
+  participantCount: number;
+  eliminations: EliminationRecord[];
+}
+
 export interface AppState {
   apiKey: string;
   phase: Phase;
@@ -29,6 +44,7 @@ export interface AppState {
   roundComplete: boolean;
   roundNumber: number;
   byeHistory: string[];
+  eliminations: EliminationRecord[];
   winner?: Film | null;
 }
 
@@ -41,4 +57,5 @@ export const emptyState = (apiKey: string): AppState => ({
   roundComplete: false,
   roundNumber: 1,
   byeHistory: [],
+  eliminations: [],
 });

@@ -11,12 +11,14 @@ export function EntryPhase({
   onAdd,
   onRemove,
   onStart,
+  onShowHistory,
 }: {
   apiKey: string;
   films: Film[];
   onAdd: (film: Film) => void;
   onRemove: (id: string) => void;
   onStart: () => void;
+  onShowHistory: () => void;
 }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<TmdbSearchResult[]>([]);
@@ -86,8 +88,13 @@ export function EntryPhase({
 
   return (
     <div className="screen">
-      <h1>🎬 Add Your Picks</h1>
-      <p className="muted">One film per person. Search TMDb for posters &amp; runtime, or add manually if it's obscure.</p>
+      <div className="entry-header">
+        <div>
+          <h1>🎬 Add Your Picks</h1>
+          <p className="muted">One film per person. Search TMDb for posters &amp; runtime, or add manually if it's obscure.</p>
+        </div>
+        <button onClick={onShowHistory}>📜 Past Tournaments</button>
+      </div>
 
       <div className="search-box">
         <input

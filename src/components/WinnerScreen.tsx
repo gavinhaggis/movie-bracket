@@ -1,7 +1,15 @@
 import { POSTER_BASE } from '../lib/tmdb';
 import type { Film } from '../types';
 
-export function WinnerScreen({ film, onRestart }: { film: Film; onRestart: () => void }) {
+export function WinnerScreen({
+  film,
+  onRestart,
+  onShowHistory,
+}: {
+  film: Film;
+  onRestart: () => void;
+  onShowHistory: () => void;
+}) {
   return (
     <div className="screen centered">
       <div className="winner-card">
@@ -15,6 +23,9 @@ export function WinnerScreen({ film, onRestart }: { film: Film; onRestart: () =>
         </div>
         <button className="primary" onClick={onRestart}>
           Start a New Tournament
+        </button>
+        <button className="ghost" onClick={onShowHistory}>
+          📜 View Past Tournaments
         </button>
       </div>
     </div>
