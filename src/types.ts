@@ -4,7 +4,12 @@ export interface Film {
   title: string;
   year: string;
   posterPath: string | null;
+  backdropPath: string | null;
   runtime: number | null;
+  tagline: string | null;
+  overview: string | null;
+  voteAverage: number | null;
+  genres: string[];
 }
 
 export interface Match {
@@ -20,11 +25,10 @@ export interface AppState {
   phase: Phase;
   films: Film[];
   currentRound: Match[];
-  currentByeFilm?: Film | null;
+  currentMatchIndex: number;
+  roundComplete: boolean;
   roundNumber: number;
   byeHistory: string[];
-  eliminationPick?: string | null;
-  finalPick?: string | null;
   winner?: Film | null;
 }
 
@@ -33,6 +37,8 @@ export const emptyState = (apiKey: string): AppState => ({
   phase: 'entry',
   films: [],
   currentRound: [],
+  currentMatchIndex: 0,
+  roundComplete: false,
   roundNumber: 1,
   byeHistory: [],
 });

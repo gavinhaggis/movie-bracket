@@ -1,5 +1,6 @@
 const BASE = 'https://api.themoviedb.org/3';
 export const POSTER_BASE = 'https://image.tmdb.org/t/p/w342';
+export const BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 
 export interface TmdbSearchResult {
   id: number;
@@ -17,12 +18,37 @@ export async function searchMovies(apiKey: string, query: string): Promise<TmdbS
   return (data.results ?? []).slice(0, 8);
 }
 
-export async function getRuntime(apiKey: string, tmdbId: number): Promise<number | null> {
+export interface TmdbMovieDetails {
+  runtime: number | null;
+  overview: string | null;
+  tagline: string | null;
+  backdropPath: string | null;
+  voteAverage: number | null;
+  genres: string[];
+}
+
+const emptyDetails: TmdbMovieDetails = {
+  runtime: null,
+  overview: null,
+  tagline: null,
+  backdropPath: null,
+  voteAverage: null,
+  genres: [],
+};
+
+export async function getMovieDetails(apiKey: string, tmdbId: number): Promise<TmdbMovieDetails> {
   const url = `${BASE}/movie/${tmdbId}?api_key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(url);
-  if (!res.ok) return null;
+  if (!res.ok) return emptyDetails;
   const data = await res.json();
-  return typeof data.runtime === 'number' && data.runtime > 0 ? data.runtime : null;
+  return {
+    runtime: typeof data.runtime === 'number' && data.runtime > 0 ? data.runtime : null,
+    overview: data.overview || null,
+    tagline: data.tagline || null,
+    backdropPath: data.backdrop_path || null,
+    voteAverage: typeof data.vote_average === 'number' && data.vote_average > 0 ? data.vote_average : null,
+    genres: Array.isArray(data.genres) ? data.genres.map((g: { name: string }) => g.name) : [],
+  };
 }
 
 export interface TmdbVideo {

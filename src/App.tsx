@@ -10,6 +10,10 @@ import { buildRound, phaseForPoolSize } from './lib/bracket';
 import { loadState, saveState, clearState } from './lib/storage';
 import { emptyState, type AppState, type Film } from './types';
 
+function byeIdFromRound(round: AppState['currentRound']): string | null {
+  return round.find((m) => m.b === null)?.a.id ?? null;
+}
+
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
 
@@ -43,15 +47,17 @@ export default function App() {
           const pool = state.films;
           const phase = phaseForPoolSize(pool.length);
           if (phase === 'bracket') {
-            const { matches, byeFilm } = buildRound(pool, []);
+            const matches = buildRound(pool, []);
+            const byeId = byeIdFromRound(matches);
             update({
               phase: 'bracket',
               currentRound: matches,
+              currentMatchIndex: 0,
+              roundComplete: false,
               roundNumber: 1,
-              byeHistory: byeFilm ? [byeFilm.id] : [],
+              byeHistory: byeId ? [byeId] : [],
               films: pool,
-              currentByeFilm: byeFilm,
-            } as Partial<AppState>);
+            });
           } else {
             update({ phase, films: pool });
           }
@@ -61,34 +67,41 @@ export default function App() {
   }
 
   if (state.phase === 'bracket') {
-    const byeFilm = state.currentByeFilm;
     return (
       <BracketView
         round={state.currentRound}
-        byeFilm={byeFilm ?? null}
         roundNumber={state.roundNumber}
+        currentMatchIndex={state.currentMatchIndex}
+        roundComplete={state.roundComplete}
         onVote={(matchIndex, filmId) => {
           const currentRound = state.currentRound.map((m, i) => (i === matchIndex ? { ...m, winnerId: filmId } : m));
           update({ currentRound });
         }}
+        onAdvance={() => {
+          if (state.currentMatchIndex + 1 < state.currentRound.length) {
+            update({ currentMatchIndex: state.currentMatchIndex + 1 });
+          } else {
+            update({ roundComplete: true });
+          }
+        }}
         onNextRound={() => {
-          const winners = state.currentRound.map((m) => (m.winnerId === m.a.id ? m.a : (m.b as Film)));
-          const survivors = byeFilm ? [...winners, byeFilm] : winners;
-          const newByeHistory = byeFilm ? [...state.byeHistory, byeFilm.id] : state.byeHistory;
+          const survivors = state.currentRound.map((m) => (m.winnerId === m.a.id ? m.a : (m.b as Film)));
           const nextPhase = phaseForPoolSize(survivors.length);
 
           if (nextPhase === 'bracket') {
-            const { matches, byeFilm: nextBye } = buildRound(survivors, newByeHistory);
+            const matches = buildRound(survivors, state.byeHistory);
+            const byeId = byeIdFromRound(matches);
             update({
               phase: 'bracket',
               currentRound: matches,
+              currentMatchIndex: 0,
+              roundComplete: false,
               roundNumber: state.roundNumber + 1,
-              byeHistory: newByeHistory,
+              byeHistory: byeId ? [...state.byeHistory, byeId] : state.byeHistory,
               films: survivors,
-              currentByeFilm: nextBye,
-            } as Partial<AppState>);
+            });
           } else {
-            update({ phase: nextPhase, films: survivors, byeHistory: newByeHistory, currentRound: [] });
+            update({ phase: nextPhase, films: survivors, currentRound: [], currentMatchIndex: 0, roundComplete: false });
           }
         }}
       />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getTrailerKey, POSTER_BASE } from '../lib/tmdb';
+import { BACKDROP_BASE, getTrailerKey, POSTER_BASE } from '../lib/tmdb';
 import type { Film } from '../types';
 
 export function FinalRound({
@@ -37,6 +37,9 @@ export function FinalRound({
           const key = trailers[f.id];
           return (
             <div className="final-card" key={f.id}>
+              {f.backdropPath && (
+                <div className="final-bg" style={{ backgroundImage: `url(${BACKDROP_BASE}${f.backdropPath})` }} />
+              )}
               <div className="final-header">
                 {f.posterPath && <img className="final-poster" src={`${POSTER_BASE}${f.posterPath}`} alt="" />}
                 <div>
@@ -44,7 +47,9 @@ export function FinalRound({
                   <div className="film-card-meta">
                     {f.year && <span>{f.year}</span>}
                     {f.runtime && <span>{f.runtime} min</span>}
+                    {f.voteAverage && <span>★ {f.voteAverage.toFixed(1)}</span>}
                   </div>
+                  {f.tagline && <p className="tagline small">"{f.tagline}"</p>}
                 </div>
               </div>
 

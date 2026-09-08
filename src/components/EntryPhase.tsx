@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getRuntime, POSTER_BASE, searchMovies, type TmdbSearchResult } from '../lib/tmdb';
+import { getMovieDetails, POSTER_BASE, searchMovies, type TmdbSearchResult } from '../lib/tmdb';
 import type { Film } from '../types';
 
 let uid = 0;
@@ -45,14 +45,19 @@ export function EntryPhase({
 
   async function addFromResult(r: TmdbSearchResult) {
     if (films.some((f) => f.tmdbId === r.id)) return;
-    const runtime = await getRuntime(apiKey, r.id);
+    const details = await getMovieDetails(apiKey, r.id);
     const film: Film = {
       id: nextId(),
       tmdbId: r.id,
       title: r.title,
       year: r.release_date ? r.release_date.slice(0, 4) : '',
       posterPath: r.poster_path,
-      runtime,
+      backdropPath: details.backdropPath,
+      runtime: details.runtime,
+      tagline: details.tagline,
+      overview: details.overview,
+      voteAverage: details.voteAverage,
+      genres: details.genres,
     };
     onAdd(film);
     setQuery('');
@@ -67,7 +72,12 @@ export function EntryPhase({
       title: query.trim(),
       year: '',
       posterPath: null,
+      backdropPath: null,
       runtime: null,
+      tagline: null,
+      overview: null,
+      voteAverage: null,
+      genres: [],
     };
     onAdd(film);
     setQuery('');

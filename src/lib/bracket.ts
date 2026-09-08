@@ -9,8 +9,12 @@ function shuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
-/** Builds the next round's matchups from a pool of films, handling byes for odd counts. */
-export function buildRound(pool: Film[], byeHistory: string[]): { matches: Match[]; byeFilm: Film | null } {
+/**
+ * Builds the next round's matchups from a pool of films, handling byes for odd
+ * counts. A bye is represented as a trailing pseudo-match with `b: null` and
+ * `winnerId` already set, so the round can be walked as one flat sequence.
+ */
+export function buildRound(pool: Film[], byeHistory: string[]): Match[] {
   const shuffled = shuffle(pool);
 
   let byeFilm: Film | null = null;
@@ -28,7 +32,11 @@ export function buildRound(pool: Film[], byeHistory: string[]): { matches: Match
     matches.push({ a: contenders[i], b: contenders[i + 1] });
   }
 
-  return { matches, byeFilm };
+  if (byeFilm) {
+    matches.push({ a: byeFilm, b: null, winnerId: byeFilm.id });
+  }
+
+  return matches;
 }
 
 /** Determines what phase the app should be in for a given surviving pool size. */
